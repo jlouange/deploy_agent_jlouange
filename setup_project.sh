@@ -39,6 +39,9 @@ read -r -p "Enter project name identifier: " version
 
 directory_name="attendance_tracker_$version"
 
+mkdir -p "$directory_name"/{Helpers,reports}
+
+
 if [ -d "$directory_name" ]; then
     echo "Directory $directory_name created successfully"
     echo "-----------------------------------------------"
