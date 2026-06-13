@@ -14,6 +14,7 @@ archiving(){ #the function responsible for archiving an incomplete process
     rm -r "$directory_name"
     echo "Incomplete directory $directory_name removed "
   fi
+  echo "Quitting ..."
   exit 1
 }
 
@@ -31,7 +32,6 @@ else
     exit 1
 fi
 
-echo "___________________________________________"
 
 #Creating the core directory structure
 
@@ -112,6 +112,7 @@ if [ -f "$directory_name/attendance_checker.py" ]; then
 else
     echo "Error: attendance_checker.py missing."
     echo "------------------------------------------------------"
+    exit 1
 fi
 
 #cp assets.csv "$directory_name"/Helpers
@@ -126,7 +127,7 @@ diana@example.com,Diana Prince,15,0
 
 EOF
 
-echo "______________________________________________"
+
 
 if [ -f "$directory_name/Helpers/assets.csv" ]; then
     echo "Deployment verified: assets.csv is present."
@@ -135,6 +136,7 @@ if [ -f "$directory_name/Helpers/assets.csv" ]; then
 else
     echo "Error: assets.csv missing."
     echo "----------------------------------------------------------"
+    exit 1
 fi
 
 #cp config.json "$directory_name"/Helpers
@@ -159,6 +161,7 @@ if [ -f "$directory_name/Helpers/config.json" ]; then
 else
     echo "Error: config.json missing."
     echo "---------------------------------------------"
+    exit 1
 fi
 
 #cp reports.log "$directory_name"/reports
@@ -178,9 +181,10 @@ if [ -f "$directory_name/reports/reports.log" ]; then
 else
     echo "Error: reports.log missing."
     echo "---------------------------------------------"
+    exit 1
 fi
 
-echo "=================================="
+
 
 #updating threshold values
 read -r -p "You want to update the attendance thresholds?[Y/N]: " choice
@@ -202,6 +206,7 @@ case "$choice" in
       echo "Threshold updated successfully to $warning% and $failure%"
     else
       echo "Error: Thresholds must be numeric values. Update aborted."
+      exit 1
 
     fi
     
@@ -214,3 +219,5 @@ case "$choice" in
       echo "Invalid input skipping updates..."
       exit 1
 esac
+
+echo "============================================"
