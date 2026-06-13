@@ -5,7 +5,7 @@ echo "============================="
 
 
 archiving(){ #the function responsible for archiving an incomplete process
-  echo -e "[!]\n The Process is interupted... \n Archiving current state..."
+  echo -e "\n[!]\n The Process is interupted... \n Archiving current state..."
 
   if [[ -d "$directory_name" ]]; then
     tar -czf "attendance_tracker_${version}_archive" "$directory_name"
@@ -23,23 +23,21 @@ trap archiving SIGINT
 #checking wether python is on the system
 if python3 --version &> /dev/null; then
     echo "Python is installed on the system"
-    echo "---------------------------------"
+    echo "_____________________________________"
 
 else
-    echo "----------------------------------"
+    echo ""
     echo -e "Python is not found! \n First install python"
     exit 1
 fi
 
-echo "========================================"
+echo "___________________________________________"
 
 #Creating the core directory structure
 
 read -r -p "Enter project name identifier: " version
 
 directory_name="attendance_tracker_$version"
-
-mkdir -p "$directory_name"/{Helpers,reports}
 
 if [ -d "$directory_name" ]; then
     echo "Directory $directory_name created successfully"
@@ -125,6 +123,8 @@ diana@example.com,Diana Prince,15,0
 
 EOF
 
+echo "______________________________________________"
+
 if [ -f "$directory_name/Helpers/assets.csv" ]; then
     echo "Deployment verified: assets.csv is present."
     echo "-------------------------------------------------------"
@@ -193,8 +193,8 @@ case "$choice" in
 
     if [[ "$warning" =~ ^[0-9]+$ && "$failure" =~ ^[0-9]+$ ]]; then
 
-      sed -i "s/75/$warning/g" "$directory_name/Helpers/config.json"
-      sed -i "s/50/$failure/g" "$directory_name/Helpers/config.json"
+      sed -i "s/\"warning\": [0-9]*/\"warning\": $warning/" "$directory_name/Helpers/config.json"
+      sed -i "s/\"failure\": [0-9]*/\"failure\": $failure/" "$directory_name/Helpers/config.json"
 
       echo "Threshold updated successfully to $warning% and $failure%"
     else
