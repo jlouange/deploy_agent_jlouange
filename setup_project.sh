@@ -3,6 +3,23 @@ echo "============================="
 echo "Attendance tracker deployment"
 echo "============================="
 
+
+archiving(){ #the function responsible for archiving an incomplete process
+  echo -e "[!]\n The Process is interupted... \n Archiving current state..."
+
+  if [[ -d "$directory_name" ]]; then
+    tar -czf "attendance_tracker_${version}_archive" "$directory_name"
+    echo "Progress Archived in attendance_tracker_${version}_archive"
+
+    rm -r "$directory_name"
+    echo "Incomplete directory $directory_name removed "
+  fi
+  exit 1
+}
+
+trap archiving SIGINT
+
+
 #checking wether python is on the system
 if python3 --version &> /dev/null; then
     echo "Python is installed on the system"
