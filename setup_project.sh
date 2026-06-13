@@ -55,7 +55,9 @@ fi
 
 #cp attendance_checker.py "$directory_name/"
 
-echo 'import csv
+cat << 'EOF' > "$directory_name/attendance_checker.py"
+
+import csv
 import json
 import os
 from datetime import datetime
@@ -99,7 +101,9 @@ def run_attendance_check():
                     print(f"[DRY RUN] Email to {email}: {message}")
 
 if __name__ == "__main__":
-    run_attendance_check()' > "$directory_name/attendance_checker.py"
+    run_attendance_check()
+
+EOF
 
 if [ -f "$directory_name/attendance_checker.py" ]; then
     echo "Deployment verified: attendance_checker.py is present."
@@ -111,12 +115,15 @@ fi
 
 #cp assets.csv "$directory_name"/Helpers
 
-echo 'Email,Names,Attendance Count,Absence Count
+cat << 'EOF' > "$directory_name/Helpers/assets.csv"
+
+Email,Names,Attendance Count,Absence Count
 alice@example.com,Alice Johnson,14,1
 bob@example.com,Bob Smith,7,8
 charlie@example.com,Charlie Davis,4,11
 diana@example.com,Diana Prince,15,0
-' > "$directory_name/Helpers/assets.csv"
+
+EOF
 
 if [ -f "$directory_name/Helpers/assets.csv" ]; then
     echo "Deployment verified: assets.csv is present."
@@ -129,8 +136,9 @@ fi
 
 #cp config.json "$directory_name"/Helpers
 
+cat << 'EOF' > "$directory_name/Helpers/config.json"
 
-echo '{
+{
     "thresholds": {
         "warning": 75,
         "failure": 50
@@ -138,7 +146,10 @@ echo '{
     "run_mode": "live",
     "total_sessions": 15
 }
-' > "$directory_name/Helpers/config.json"
+
+
+EOF
+
 
 if [ -f "$directory_name/Helpers/config.json" ]; then
     echo "Deployment verified: config.json is present."
@@ -149,10 +160,14 @@ fi
 
 #cp reports.log "$directory_name"/reports
 
-echo '--- Attendance Report Run: 2026-02-06 18:10:01.468726 ---
+cat << 'EOF' > "$directory_name/reports/reports.log"
+
+--- Attendance Report Run: 2026-02-06 18:10:01.468726 ---
 [2026-02-06 18:10:01.469363] ALERT SENT TO bob@example.com: URGENT: Bob Smith, your attendance is 46.7%. You will fail this class.
 [2026-02-06 18:10:01.469424] ALERT SENT TO charlie@example.com: URGENT: Charlie Davis, your attendance is 26.7%. You will fail this class.
-' > "$directory_name/reports/reports.log"
+
+
+EOF
 
 if [ -f "$directory_name/reports/reports.log" ]; then
     echo "Deployment verified: reports.log is present."
