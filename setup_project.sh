@@ -13,14 +13,28 @@ archiving(){ #the function responsible for archiving an incomplete process
 
     rm -r "$directory_name"
     echo "Incomplete directory $directory_name removed "
+
+  else
+    echo "Archiving current state..."
+    echo "[!] THERE IS NOTHING TO ARCHIVE..."
+
   fi
-  echo "Quitting ..."
+  echo "Quitting..."
   exit 1
+
 }
 
 trap archiving SIGINT
 
+restore(){
 
+  if [ -d "$directory_name" ]; then
+      echo "[!] Cleaning up partial directory: $directory_name"
+      rm -r "$directory_name"
+
+  fi
+
+}
 #checking wether python is on the system
 if python3 --version &> /dev/null; then
     echo "Python is installed on the system"
@@ -29,6 +43,7 @@ if python3 --version &> /dev/null; then
 else
     echo ""
     echo -e "Python is not found! \n First install python"
+    restore
     exit 1
 fi
 
@@ -39,6 +54,11 @@ read -r -p "Enter project name identifier: " version
 
 directory_name="attendance_tracker_$version"
 
+if [ -e "$directory_name" ]; then
+    echo "ERROR: Directory $directory_name already exists!"
+    exit 1
+fi
+
 mkdir -p "$directory_name"/{Helpers,reports}
 
 
@@ -48,6 +68,7 @@ if [ -d "$directory_name" ]; then
 else  
     echo "ERROR: Directory creation failed"
     echo "--------------------------------"
+    restore
     exit 1
 fi
 
@@ -112,6 +133,7 @@ if [ -f "$directory_name/attendance_checker.py" ]; then
 else
     echo "Error: attendance_checker.py missing."
     echo "------------------------------------------------------"
+    restore
     exit 1
 fi
 
@@ -136,6 +158,7 @@ if [ -f "$directory_name/Helpers/assets.csv" ]; then
 else
     echo "Error: assets.csv missing."
     echo "----------------------------------------------------------"
+    restore
     exit 1
 fi
 
@@ -161,6 +184,7 @@ if [ -f "$directory_name/Helpers/config.json" ]; then
 else
     echo "Error: config.json missing."
     echo "---------------------------------------------"
+    restore
     exit 1
 fi
 
@@ -181,35 +205,43 @@ if [ -f "$directory_name/reports/reports.log" ]; then
 else
     echo "Error: reports.log missing."
     echo "---------------------------------------------"
+    restore
     exit 1
 fi
-
-
 
 #updating threshold values
 read -r -p "You want to update the attendance thresholds?[Y/N]: " choice
 
 case "$choice" in
   [Yy]*)
+  while true; do
     read -r -p "Enter warning threshold(default 75%): " warning
     warning=${warning:-75}
     warning=${warning%[%]*}
+
+    if [[ "$warning" =~ ^[0-9]+$ && "$warning" -le 100 ]]; then
+      break
+    else
+      echo "Please enter a valid number(0-100)!"
+    fi
+    done
+  while true; do
     read -r -p "Enter failure threshold(default 50%): " failure
     failure=${failure:-50}
     failure=${failure%[%]*}
-
-    if [[ "$warning" =~ ^[0-9]+$ && "$failure" =~ ^[0-9]+$ ]]; then
-
-      sed -i "s/\"warning\": [0-9]*/\"warning\": $warning/" "$directory_name/Helpers/config.json"
-      sed -i "s/\"failure\": [0-9]*/\"failure\": $failure/" "$directory_name/Helpers/config.json"
-
-      echo "Threshold updated successfully to $warning% and $failure%"
-    else
-      echo "Error: Thresholds must be numeric values. Update aborted."
-      exit 1
-
-    fi
     
+    if [[ "$failure" =~ ^[0-9]+$ && "$failure" -le 100 ]]; then
+      break
+    else
+      echo "Please enter a valid number(0-100)!"
+    fi
+  done
+
+
+    sed -i "s/\"warning\": [0-9]*/\"warning\": $warning/" "$directory_name/Helpers/config.json"
+    sed -i "s/\"failure\": [0-9]*/\"failure\": $failure/" "$directory_name/Helpers/config.json"
+
+    echo "Threshold updated successfully to $warning% and $failure%"
 
     ;;
   [Nn]*)
@@ -217,7 +249,10 @@ case "$choice" in
     ;;
     *)
       echo "Invalid input skipping updates..."
+      restore
       exit 1
+      
 esac
+
 
 echo "============================================"
