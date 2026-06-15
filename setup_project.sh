@@ -31,7 +31,7 @@ restore(){
   if [ -d "$directory_name" ]; then
       echo "[!] Cleaning up partial directory: $directory_name"
       rm -rf "$directory_name"
-
+  
   fi
 
 }
@@ -42,7 +42,7 @@ if python3 --version &> /dev/null; then
 
 else
     echo ""
-    echo -e "Python is not found! \n First install python"
+    echo -e "Python is not found! \n First install python to run the shell script!"
     restore
     exit 1
 fi
@@ -59,8 +59,14 @@ if [ -e "$directory_name" ]; then
     exit 1
 fi
 
-mkdir -p "$directory_name"/{Helpers,reports}
 
+if ! mkdir -p "$directory_name"/{Helpers,reports} 2> /tmp/error.log; then
+    echo "Failed to create directories."
+    cat /tmp/error.log
+    rm -f /tmp/error.log
+    restore
+    exit 1
+fi
 
 if [ -d "$directory_name" ]; then
     echo "Directory $directory_name created successfully"
@@ -215,38 +221,54 @@ read -r -p "You want to update the attendance thresholds?[Y/N]: " choice
 
 case "$choice" in
   [Yy]*)
-  while true; do
-    read -r -p "Enter warning threshold(default 75%): " warning
-    warning=${warning:-75}
-    warning=${warning%[%]*}
 
-    if [[ "$warning" =~ ^[0-9]+(\.[0-9]+)?$ ]] && [ "$(echo "$warning >= 0 && $warning <= 100" | bc -l )" -eq 1 ]; then
-      break
-    else
-      echo "Please enter a valid number(0-100)!"
-    fi
+    while true; do
+      read -r -p "Enter warning threshold(default 75%): " warning
+      warning=${warning:-75}
+      warning=${warning%[%]*}
+
+      if [[ "$warning" =~ ^[0-9]+$ ]] && (( warning >=0 && warning <= 100 )); then
+        break
+      else
+        echo "Please enter a valid whole number(0-100)!"
+      fi
+      done
+    while true; do
+      read -r -p "Enter failure threshold(default 50%): " failure
+      failure=${failure:-50}
+      failure=${failure%[%]*}
+      
+      if [[ "$failure" =~ ^[0-9]+$ ]] && (( failure >=0 && failure <= 100 )); then
+        break
+      else
+        echo "Please enter a valid whole number(0-100)!"
+      fi
+      
     done
-  while true; do
-    read -r -p "Enter failure threshold(default 50%): " failure
-    failure=${failure:-50}
-    failure=${failure%[%]*}
-    
-    if [[ "$failure" =~ ^[0-9]+(\.[0-9]+)?$ ]] && [ "$(echo "$failure >= 0 && $failure <= 100" | bc -l )" -eq 1 ]; then
-      break
-    else
-      echo "Please enter a valid number(0-100)!"
-    fi
 
-  done
 
-    sed -i "s/\"warning\":[[:space:]]*[0-9]*\.?[0-9]*/\"warning\": $warning/" "$directory_name/Helpers/config.json"
-    sed -i "s/\"failure\":[[:space:]]*[0-9]*\.?[0-9]*/\"failure\": $failure/" "$directory_name/Helpers/config.json"
+    if [ "$failure" -lt "$warning" ]; then
+
+    sed -i "s/\"warning\": [0-9]*/\"warning\": $warning/" "$directory_name/Helpers/config.json"
+    sed -i "s/\"failure\": [0-9]*/\"failure\": $failure/" "$directory_name/Helpers/config.json"
 
     echo "Threshold updated successfully to warning: $warning% and failure: $failure%"
+
+  
+
+    else
+      echo "====================================================="
+      echo "Failure threshold must be less than Warning threshold"
+      echo "Quitting..."
+      restore
+      exit 1
+
+    fi
 
     ;;
   [Nn]*)
       echo "Keeping default thresholds (75% and 50%)"
+
     ;;
     *)
       echo "Invalid input skipping updates..."
@@ -254,5 +276,7 @@ case "$choice" in
       exit 1
       
 esac
+
+
 
 echo "============================================"
