@@ -212,47 +212,48 @@ fi
 #updating threshold values
 read -r -p "You want to update the attendance thresholds?[Y/N]: " choice
 
-
 case "$choice" in
-  [Yy]*)
-  while true; do
-    read -r -p "Enter warning threshold(default 75%): " warning
-    warning=${warning:-75}
-    warning=${warning%[%]*}
+    [Yy]*)
+        while true; do
+            read -r -p "Warning threshold(default 75%): " warning
+            warning=${warning:-75}
+            warning=${warning%[%]*}
+            
+            if [[ "$warning" =~ ^[0-9]+(\.[0-9]+)?$ ]] && [ "$(echo "$warning >= 0 && $warning <= 100" | bc -l)" -eq 1 ]; then
+                break
+            else
+                echo "Enter a valid input from 0 to 100"
+            fi
+        done
 
-    if [[ "$warning" =~ ^[0-9]+(\.[0-9]+)?$ ]] && [ "$(echo "$warning >= 0 && $warning <= 100" | bc -l )" -eq 1 ]; then
-      break
-    else
-      echo "Please enter a valid number(0-100)!"
-    fi
-    done
-  while true; do
-    read -r -p "Enter failure threshold(default 50%): " failure
-    failure=${failure:-50}
-    failure=${failure%[%]*}
-    
-    if [[ "$failure" =~ ^[0-9]+(\.[0-9]+)?$ ]] && [ "$(echo "$failure >= 0 && $failure <= 100" | bc -l )" -eq 1 ]; then
-      break
-    else
-      echo "Please enter a valid number(0-100)!"
-    fi
+        while true; do
+            read -r -p "Failure threshold(default 50%): " failure
+            failure=${failure:-50}
+            failure=${failure%[%]*}
+            
+            # Use bc to validate decimals between 0 and 100
+            if [[ "$failure" =~ ^[0-9]+(\.[0-9]+)?$ ]] && [ "$(echo "$failure >= 0 && $failure <= 100" | bc -l)" -eq 1 ]; then
+                break
+            else
+                echo "Enter a valid input from 0 to 100"
+            fi
+        done
 
-  done
+        sed -i "s/\"warning\": [0-9.]*/\"warning\": $warning/" "$directory_name/Helpers/config.json"
+        sed -i "s/\"failure\": [0-9.]*/\"failure\": $failure/" "$directory_name/Helpers/config.json"
 
-    sed -i "s/\"warning\":[[:space:]]*[0-9]*\.?[0-9]*/\"warning\": $warning/" "$directory_name/Helpers/config.json"
-    sed -i "s/\"failure\":[[:space:]]*[0-9]*\.?[0-9]*/\"failure\": $failure/" "$directory_name/Helpers/config.json"
-
-    echo "Threshold updated successfully to warning: $warning% and failure: $failure%"
-
-    ;;
-  [Nn]*)
-      echo "Keeping default thresholds (75% and 50%)"
-    ;;
+        echo "Threshold updated successfully to $warning% and $failure%"
+        ;;
+    [Nn]*)
+        echo "Keeping default thresholds (75% and 50%)"
+        ;;
     *)
-      echo "Invalid input skipping updates..."
-      restore
-      exit 1
-      
+        echo "Input invalid. Keeping default thresholds. Please enter Y or N next time."
+        echo "Deleting the created directory $directory_name"
+        rm -r "$directory_name"
+        exit 1
+        ;;
+
 esac
 
 echo "============================================"
