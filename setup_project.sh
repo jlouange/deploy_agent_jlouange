@@ -35,6 +35,7 @@ restore(){
   fi
 
 }
+
 #checking wether python is on the system
 if python3 --version &> /dev/null; then
     echo "Python is installed on the system"
