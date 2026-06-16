@@ -36,7 +36,7 @@ archives the exit state of the process when the user presses
 **`CTRL + C`** while the script is running.
 
 Here the SIGNAL is captured by utilising the **`trap`** command  
-to intercept the SIGINT signal sent when the user presses **'Ctrl + c'**
+to intercept the SIGINT signal sent when the user presses **`CTRL + C`**
 and then the archive is made with the command:
 
 ```bash
