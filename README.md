@@ -50,8 +50,8 @@ the form of the archive is:
 attendance_tracker_{input}_archive
 ```
 
-[![Play Video](https://shields.io)]([![Play Video](https://shields.io)](https://drive.google.com/file/d/1GPGo6VEH75cmW29gWD6Nqq61SrOTxDmq/view?usp=sharing)
-)
+[Play Video](https://drive.google.com/file/d/1GPGo6VEH75cmW29gWD6Nqq61SrOTxDmq/view?usp=sharing)
+
 
 
 
